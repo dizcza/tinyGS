@@ -67,7 +67,10 @@ public:
   int16_t remote_SPIreadRegister(char* payload, size_t payload_len);
   int16_t sendTx(uint8_t* data, size_t length);
   int16_t sendTestPacket();
-   
+
+  String last_message = "";
+  struct timeval last_message_timestamp;
+
 private:
   Radio();
   PhysicalLayer* lora;

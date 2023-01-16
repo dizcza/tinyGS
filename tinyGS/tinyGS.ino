@@ -101,7 +101,6 @@ Status status;
 
 void printControls();
 void switchTestmode();
-void checkButton();
 void setupNTP();
 
 void ntp_cb (NTPEvent_t e)
@@ -128,7 +127,6 @@ void wifiConnected()
 {
   configManager.setWifiConnectionCallback(NULL);
   setupNTP();
-  displayShowConnected();
   arduino_ota_setup();
   configManager.delay(100); // finish animation
 
@@ -162,15 +160,8 @@ void setup()
   configManager.doLoop();
   pinMode (configManager.getBoardConfig().PROG__BUTTON, INPUT_PULLUP);
   displayInit();
-  displayShowInitialCredits();
   configManager.delay(1000);
   mqtt.begin();
-
-  if (configManager.getOledBright() == 0)
-  {
-    displayTurnOff();
-  }
-  
   printControls();
 }
 
@@ -200,7 +191,6 @@ void loop() {
   }
   
   // configured and no connection
-  checkButton();
   if (radio.isReady())
   {
     status.radio_ready = true;
@@ -208,19 +198,20 @@ void loop() {
   }
   else {
     status.radio_ready = false;
+    displayLoraFailed();
   }
 
   if (configManager.getState() < 4) // connection or ap mode
   {
-    displayShowStaMode(configManager.isApMode());
-    return;
+    // displayShowStaMode(configManager.isApMode());
+    // return;
+  } else {
+    mqtt.loop();
+    OTA::loop();
   }
 
-  // connected
-
-  mqtt.loop();
-  OTA::loop();
-  if (configManager.getOledBright() != 0) displayUpdate();
+  displayCurrTime();
+  displayRadioReceived(radio.last_message, radio.last_message_timestamp);
 }
 
 void setupNTP()
@@ -241,33 +232,6 @@ void setupNTP()
   }
 
   printLocalTime();
-}
-
-void checkButton()
-{
-  #define RESET_BUTTON_TIME 8000
-  static unsigned long buttPressedStart = 0;
-  if (!digitalRead (configManager.getBoardConfig().PROG__BUTTON))
-  {
-    if (!buttPressedStart)
-    {
-      buttPressedStart = millis();
-    }
-    else if (millis() - buttPressedStart > RESET_BUTTON_TIME) // long press
-    {
-      Log::console(PSTR("Rescue mode forced by button long press!"));
-      Log::console(PSTR("Connect to the WiFi AP: %s and open a web browser on ip 192.168.4.1 to configure your station and manually reboot when you finish."), configManager.getThingName());
-      configManager.forceDefaultPassword(true);
-      configManager.forceApMode(true);
-      buttPressedStart = 0;
-    }
-  }
-  else {
-    unsigned long elapsedTime = millis() - buttPressedStart;
-    if (elapsedTime > 30 && elapsedTime < 1000) // short press
-      displayNextFrame();
-    buttPressedStart = 0;
-  }
 }
 
 void handleSerial()

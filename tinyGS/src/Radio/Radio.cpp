@@ -321,6 +321,9 @@ uint8_t Radio::listen()
 
   if (state == ERR_NONE && respLen > 0)
   {
+    last_message = (const char*) respFrame;
+    last_message = last_message.substring(0, respLen);
+    gettimeofday(&last_message_timestamp, NULL);
     // read optional data
     Log::console(PSTR("Packet (%u bytes):"), respLen);
     uint16_t buffSize = respLen * 2 + 1;

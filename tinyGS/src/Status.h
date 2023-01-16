@@ -71,8 +71,8 @@ struct Status {
   PacketInfo lastPacketInfo;
   ModemInfo modeminfo;
   float satPos[2] = {0, 0};
-  uint8_t remoteTextFrameLength[4] = {0, 0, 0, 0};
-  TextFrame remoteTextFrame[4][15];
+  uint8_t remoteTextFrameLength[1] = {0};
+  TextFrame remoteTextFrame[1][15];
   float time_offset = 0;
  };
 

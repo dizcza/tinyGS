@@ -23,14 +23,11 @@
 #include "../Status.h"
 
 void displayInit();
-void displayShowConnected();
-void displayShowInitialCredits();
 void displayShowApMode();
 void displayShowStaMode(bool ap);
 void displayUpdate();
-void displayTurnOff();
-void displayNextFrame();
+void displayRadioReceived(const String& message, const struct timeval& timestamp);
+void displayLoraFailed();
+void displayCurrTime();
 
 extern Status status;
-
-  
